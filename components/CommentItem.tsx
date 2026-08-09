@@ -26,6 +26,7 @@ export default function CommentItem({
   post,
   expandedComments,
   setExpandedComments,
+  highlighted = false,
 }: {
   comment: CommentWithChildren;
   depth?: number;
@@ -34,6 +35,7 @@ export default function CommentItem({
   post?: any;
   expandedComments: Set<string>;
   setExpandedComments: React.Dispatch<React.SetStateAction<Set<string>>>;
+  highlighted?: boolean;
 }) {
   const allowActions =
     comment.author.email === session?.user?.email ||
@@ -89,13 +91,20 @@ export default function CommentItem({
 
   return (
     <motion.div
+      data-comment-id={comment.id}
       className={`${depth > 0 ? "ml-8 border-l border-border pl-4" : ""}`}
       initial={{ height: 0, opacity: 0, y: -20 }}
       animate={{ height: "auto", opacity: 1, y: 0 }}
       exit={{ height: 0, opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="bg-background rounded-lg p-4 shadow-sm border border-border mb-3">
+      <div
+        className={`bg-background rounded-lg p-4 shadow-sm border mb-3 transition-all duration-500 ${
+          highlighted
+            ? "border-violet-500 ring-2 ring-violet-500/40 shadow-violet-500/20 shadow-lg"
+            : "border-border"
+        }`}
+      >
         <div className="flex items-start space-x-3">
           {/* user avatar */}
           <div className="flex-shrink-0">
@@ -142,16 +151,18 @@ export default function CommentItem({
 
             {/* reply and expand buttons */}
             <div className="flex items-center space-x-4 ml-auto w-max">
-              <Button
-                onClick={() => {
-                  setReplying(true);
-                  expand();
-                }}
-                variant={"ghost"}
-              >
-                <ReplyIcon />
-                <span>Reply</span>
-              </Button>
+              {session && (
+                <Button
+                  onClick={() => {
+                    setReplying(true);
+                    expand();
+                  }}
+                  variant={"ghost"}
+                >
+                  <ReplyIcon />
+                  <span>Reply</span>
+                </Button>
+              )}
 
               <Button
                 onClick={toggleCollapse}

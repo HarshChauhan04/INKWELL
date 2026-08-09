@@ -1,2 +1,2 @@
-export const appName = "MyApp";
-export const appDescription = "Here you can create posts and comment on posts.";
+export const appName = "Inkwell";
+export const appDescription = "A space for thinkers, writers, and storytellers. Craft your ideas, share your voice.";

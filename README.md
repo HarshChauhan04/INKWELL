@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Modern Blog & Discussion Platform
 
-## Getting Started
+A full-stack, feature-rich blogging and interactive discussion platform built with **Next.js 15 (App Router)**, **React 19**, **Prisma ORM**, and **Tailwind CSS**.
 
-First, run the development server:
+---
+
+## 🌟 Key Features
+
+- **📝 Rich Markdown & Code Authoring**: Full Markdown support including code syntax highlighting and live Mermaid diagram rendering.
+- **🔍 Interactive Feed & Filtering**: Real-time post search, tag filtering, and cursor-based infinite/paginated feed loading powered by React `useTransition`.
+- **💬 Nested Comment System**: Multi-threaded, nested comment discussions with reply support on every blog post.
+- **🔐 User Authentication**: Secure authentication powered by NextAuth.js and Prisma Adapter.
+- **🎨 Animated & Responsive UI**: Smooth UI transitions powered by Framer Motion, Lucide icons, and Radix UI primitives.
+- **🖼️ Profile & Avatar Uploader**: User profile management featuring client-side image cropping and avatar uploads.
+- **🌙 Dark Mode Support**: Native dark/light mode switching using `next-themes`.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router & Server Actions)
+- **UI Library**: [React 19](https://react.dev/)
+- **Database & ORM**: [PostgreSQL](https://www.postgresql.org/) with [Prisma ORM](https://www.prisma.io/)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/)
+- **Styling & Animations**: [Tailwind CSS v4](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/)
+- **Markdown & Diagramming**: [react-markdown](https://github.com/remarkjs/react-markdown), [react-syntax-highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter), [Mermaid](https://mermaid.js.org/)
+- **Form Management**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Ensure you have Node.js 18+ installed and a running PostgreSQL database instance.
+
+### 1. Clone & Install Dependencies
+
+```bash
+git clone <repository-url>
+cd blog-site
+npm install
+```
+
+### 2. Configure Environment Variables
+
+Create a `.env` file in the root directory and set the required variables:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/blog_db?schema=public"
+NEXTAUTH_SECRET="your-nextauth-secret"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Optional Cloudinary / Storage credentials if configuring image uploads
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+```
+
+### 3. Database Setup
+
+Run Prisma migrations to sync your database schema:
+
+```bash
+npx prisma db push
+# or
+npx prisma migrate dev
+```
+
+Generate Prisma client:
+
+```bash
+npx prisma generate
+```
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+```text
+├── actions/             # Next.js Server Actions (posts, comments, users)
+├── app/                 # Next.js App Router pages and API routes
+│   ├── api/             # API handlers (NextAuth, upload, etc.)
+│   ├── posts/           # Post views and creation pages
+│   ├── profile/         # User profile management
+│   └── page.tsx         # Home feed
+├── components/          # Reusable UI components & animations
+│   ├── ui/              # Base Shadcn/Radix UI elements
+│   ├── animations/      # Framer Motion animated components
+│   └── InteractiveFeed.tsx
+├── prisma/              # Prisma schema & migrations
+├── utils/               # Auth options, markdown helpers, utilities
+└── public/              # Static assets
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📜 Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev`: Starts the Next.js development server.
+- `npm run build`: Generates Prisma client and builds the application for production.
+- `npm run start`: Runs the built production application.
+- `npm run lint`: Runs ESLint check.

@@ -9,12 +9,21 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  if (!token) {
+  const protectedRoutes = [
+    /^\/new_post(\/.*)?$/,
+    /^\/account_settings(\/.*)?$/,
+    /^\/my_posts(\/.*)?$/,
+    /^\/posts\/[^/]+\/update(\/.*)?$/,
+  ];
+
+  const isProtected = protectedRoutes.some((route) => route.test(path));
+
+  if (isProtected && !token) {
     return NextResponse.rewrite(new URL("/unauthorized", request.url));
-  } else {
-    if (path === "/unauthorized") {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  }
+
+  if (token && path === "/unauthorized") {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

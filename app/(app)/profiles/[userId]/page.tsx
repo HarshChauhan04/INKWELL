@@ -6,15 +6,20 @@ import prisma from "@/prisma/client";
 import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-    },
-  });
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+      },
+    });
 
-  return users.map((user) => ({
-    userId: user.id,
-  }));
+    return users.map((user) => ({
+      userId: user.id,
+    }));
+  } catch (error) {
+    console.warn("Skipping static params generation for profiles due to database connection error:", error);
+    return [];
+  }
 }
 
 interface PersonPageProps {

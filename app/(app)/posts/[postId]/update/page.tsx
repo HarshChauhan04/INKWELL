@@ -11,10 +11,12 @@ import {
   ExternalLinkIcon,
   LoaderCircleIcon,
   PencilIcon,
+  TagIcon,
+  XIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, KeyboardEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -28,10 +30,31 @@ export default function UpdatePostPage() {
   const { postId } = useParams<{ postId: string }>();
   const [loading, setLoading] = useState<boolean>(true);
   const [post, setPost] = useState<Post | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   const form = useForm<PostFormValues>({
     defaultValues: { title: post?.title || "", content: post?.content || "" },
   });
+
+  const addTag = () => {
+    const normalized = tagInput.trim().toLowerCase().replace(/\s+/g, "-");
+    if (normalized && !tags.includes(normalized) && tags.length < 5) {
+      setTags((prev) => [...prev, normalized]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+  };
+
+  const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag();
+    }
+  };
 
   const scrollToPreview = () => {
     const previewSection = document.querySelector("#preview");
@@ -45,6 +68,7 @@ export default function UpdatePostPage() {
       try {
         const p = await getPostById(postId);
         setPost(p);
+        setTags((p as any).tags ?? []);
         form.reset({
           title: p.title ?? undefined,
           content: p.content ?? undefined,
@@ -64,6 +88,7 @@ export default function UpdatePostPage() {
       const postData = await updatePost(postId, {
         title: data.title,
         content: data.content,
+        tags,
       });
 
       if (postData.id) {
@@ -102,8 +127,44 @@ export default function UpdatePostPage() {
         <input
           {...form.register("title", { required: true })}
           placeholder="Title"
-          className="border rounded px-3 py-2"
+          className="border rounded px-3 py-2 bg-background text-foreground"
         />
+
+        {/* Tags input */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 border rounded px-3 py-2 bg-background flex-wrap">
+            <TagIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="flex items-center gap-1 bg-primary/10 text-primary text-xs font-medium px-2 py-0.5 rounded-full border border-primary/20"
+              >
+                #{tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="hover:text-destructive transition-colors"
+                >
+                  <XIcon className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              onBlur={addTag}
+              placeholder={tags.length < 5 ? "Add tags (press Enter or comma)..." : "Max 5 tags"}
+              disabled={tags.length >= 5}
+              className="flex-1 min-w-[180px] bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Up to 5 tags. Press <kbd className="px-1 py-0.5 bg-muted rounded text-xs">Enter</kbd> or <kbd className="px-1 py-0.5 bg-muted rounded text-xs">,</kbd> to add.
+          </p>
+        </div>
+
         <Textarea
           {...form.register("content", { required: true })}
           placeholder="Write your post in markdown..."

@@ -5,15 +5,20 @@ import prisma from "@/prisma/client";
 import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
-  const posts = await prisma.post.findMany({
-    select: {
-      id: true,
-    },
-  });
+  try {
+    const posts = await prisma.post.findMany({
+      select: {
+        id: true,
+      },
+    });
 
-  return posts.map((post) => ({
-    postId: post.id,
-  }));
+    return posts.map((post) => ({
+      postId: post.id,
+    }));
+  } catch (error) {
+    console.warn("Skipping static params generation for posts due to database connection error:", error);
+    return [];
+  }
 }
 
 interface PostPageProps {

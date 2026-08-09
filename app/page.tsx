@@ -1,41 +1,18 @@
-import RevealHero from "@/components/animations/RevealHero";
-import PostCard from "@/components/PostCard";
-import { Button } from "@/components/ui/button";
-import prisma from "@/prisma/client";
-import { PlusIcon } from "lucide-react";
-import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/utils/authOptions";
+import { redirect } from "next/navigation";
+import LandingPage from "@/components/LandingPage";
 
-export default async function HomePage() {
-  const posts = await prisma.post.findMany({
-    include: {
-      author: true,
-    },
-  });
+export const dynamic = "force-dynamic";
 
-  return (
-    <section className="flex flex-col h-full gap-4 max-w-4xl mx-auto p-4 w-full">
-      <div className="flex items-center justify-between">
-        <RevealHero>
-          <span className="text-2xl font-bold">Feed</span>
-        </RevealHero>
-        <Link href="/new_post">
-          <Button>
-            <PlusIcon />
-            New Post
-          </Button>
-        </Link>
-      </div>
+export default async function RootPage() {
+  const session = await getServerSession(authOptions);
 
-      {posts.length === 0 && (
-        <span className="text-muted-foreground mx-auto text-center text-balance">
-          No posts available. Create one to get started!
-        </span>
-      )}
-      <div className="flex flex-col gap-4">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </div>
-    </section>
-  );
+  // Logged-in users go straight to the feed
+  if (session) {
+    redirect("/feed");
+  }
+
+  // Non-logged-in users see the landing page
+  return <LandingPage />;
 }

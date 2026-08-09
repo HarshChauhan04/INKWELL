@@ -5,8 +5,13 @@ import { getServerSession } from "next-auth";
 import prisma from "@/prisma/client";
 import { revalidatePath } from "next/cache";
 
-// posts
-export async function createPost(data: { title: string; content: string }) {
+// ─── Posts ────────────────────────────────────────────────────────────────────
+
+export async function createPost(data: {
+  title: string;
+  content: string;
+  tags?: string[];
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user?.email) {
@@ -17,6 +22,7 @@ export async function createPost(data: { title: string; content: string }) {
     data: {
       title: data.title,
       content: data.content,
+      tags: data.tags ?? [],
       authorEmail: session.user.email,
     },
   });
@@ -70,7 +76,7 @@ export async function deletePost(postId: string) {
 
 export async function updatePost(
   postId: string,
-  newData: { title?: string; content?: string }
+  newData: { title?: string; content?: string; tags?: string[] }
 ) {
   const session = await getServerSession(authOptions);
 
@@ -88,7 +94,51 @@ export async function updatePost(
   return post;
 }
 
-// comments
+// ─── Paginated Posts ──────────────────────────────────────────────────────────
+
+const PAGE_SIZE = 6;
+
+export async function getPaginatedPosts({
+  cursor,
+  searchQuery,
+  tag,
+}: {
+  cursor?: string | null;
+  searchQuery?: string;
+  tag?: string;
+}): Promise<{ posts: any[]; nextCursor: string | null }> {
+  const where: Record<string, any> = {};
+
+  if (searchQuery && searchQuery.trim()) {
+    where.OR = [
+      { title: { contains: searchQuery, mode: "insensitive" } },
+      { content: { contains: searchQuery, mode: "insensitive" } },
+    ];
+  }
+
+  if (tag && tag.trim()) {
+    where.tags = { has: tag };
+  }
+
+  const posts = await prisma.post.findMany({
+    where,
+    take: PAGE_SIZE + 1,
+    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+    orderBy: { createdAt: "desc" },
+    include: { author: true },
+  });
+
+  let nextCursor: string | null = null;
+  if (posts.length > PAGE_SIZE) {
+    const nextItem = posts.pop();
+    nextCursor = nextItem!.id;
+  }
+
+  return { posts, nextCursor };
+}
+
+// ─── Comments ─────────────────────────────────────────────────────────────────
+
 export async function postComment({
   postId,
   content,

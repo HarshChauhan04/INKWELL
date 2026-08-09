@@ -24,6 +24,7 @@ model Post {
   id        String    @id @default(cuid())
   title     String?
   content   String
+  tags      String[]  @default([])
   author    User      @relation(fields: [authorEmail], references: [email], onDelete: Cascade)
   authorEmail  String
   comments  Comment[]
