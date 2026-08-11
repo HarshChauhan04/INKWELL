@@ -76,6 +76,7 @@ export default function PostCommentSection({ post }: { post: ExtendedPost }) {
   }, [allComments]);
 
   // Generate Mermaid chart
+  const postTitle = post.title;
   const generateMermaidChart = useMemo(() => {
     if (!allComments || allComments.length === 0) {
       return `flowchart TD\n  A["💬 No comments yet"]\n  classDef default fill:#1e1e2e,stroke:#6c6f93,stroke-width:2px,color:#cdd6f4`;
@@ -98,7 +99,7 @@ export default function PostCommentSection({ post }: { post: ExtendedPost }) {
     const safeId = (id: string) => `N${id.replace(/[^a-zA-Z0-9]/g, "_")}`;
 
     let chartCode = "flowchart TD\n";
-    const safeTitle = (post.title ?? "Post")
+    const safeTitle = (postTitle ?? "Post")
       .replace(/["\[\]<>]/g, "")
       .slice(0, 35);
     chartCode += `  POST["📝 ${safeTitle}"]\n`;
@@ -148,10 +149,7 @@ export default function PostCommentSection({ post }: { post: ExtendedPost }) {
     });
 
     return chartCode;
-  // post.author.name and post.title are stable fields read from the post prop;
-  // including the whole post object keeps deps correct without redundant primitives
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allComments, post]);
+  }, [allComments, postTitle, postAuthorName]);
 
   // Render Mermaid SVG
   useEffect(() => {
