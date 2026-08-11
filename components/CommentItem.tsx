@@ -1,4 +1,3 @@
-import { Session } from "next-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { formatDistance as timeFormatDistance } from "date-fns";
 import { useState, useTransition } from "react";
@@ -17,12 +16,12 @@ import {
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { CommentWithChildren } from "@/utils/types";
+import { useSession } from "next-auth/react";
 
 export default function CommentItem({
   comment,
   depth = 0,
   hasChildren = false,
-  session,
   post,
   expandedComments,
   setExpandedComments,
@@ -31,12 +30,15 @@ export default function CommentItem({
   comment: CommentWithChildren;
   depth?: number;
   hasChildren?: boolean;
-  session: Session;
   post?: any;
   expandedComments: Set<string>;
   setExpandedComments: React.Dispatch<React.SetStateAction<Set<string>>>;
   highlighted?: boolean;
 }) {
+  // Read session directly so the Reply button is always in sync with auth state
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated" && !!session;
+
   const allowActions =
     comment.author.email === session?.user?.email ||
     post?.author?.email === session?.user?.email;
@@ -151,7 +153,7 @@ export default function CommentItem({
 
             {/* reply and expand buttons */}
             <div className="flex items-center space-x-4 ml-auto w-max">
-              {session && (
+              {isLoggedIn && (
                 <Button
                   onClick={() => {
                     setReplying(true);
@@ -236,7 +238,6 @@ export default function CommentItem({
                 depth={depth + 1}
                 hasChildren={childHasChildren}
                 post={post}
-                session={session}
                 expandedComments={expandedComments}
                 setExpandedComments={setExpandedComments}
               />

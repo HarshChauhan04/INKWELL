@@ -5,6 +5,17 @@ import { getServerSession } from "next-auth";
 import prisma from "@/prisma/client";
 import { revalidatePath } from "next/cache";
 
+
+/** Revalidate all feed/post listing pages — scoped, not full-layout */
+function revalidatePostPaths(postId?: string) {
+  revalidatePath("/posts");
+  revalidatePath("/feed");
+  revalidatePath("/my_posts");
+  if (postId) {
+    revalidatePath(`/posts/${postId}`);
+  }
+}
+
 // ─── Posts ────────────────────────────────────────────────────────────────────
 
 export async function createPost(data: {
@@ -27,7 +38,7 @@ export async function createPost(data: {
     },
   });
 
-  revalidatePath(`/`, "layout");
+  revalidatePostPaths(post.id);
 
   return post;
 }
@@ -69,7 +80,7 @@ export async function deletePost(postId: string) {
     where: { id: postId, authorEmail: session.user.email },
   });
 
-  revalidatePath(`/`, "layout");
+  revalidatePostPaths();
 
   return { message: "Post deleted successfully" };
 }
@@ -89,7 +100,7 @@ export async function updatePost(
     data: newData,
   });
 
-  revalidatePath(`/`, "layout");
+  revalidatePostPaths(postId);
 
   return post;
 }
@@ -163,7 +174,7 @@ export async function postComment({
     },
   });
 
-  revalidatePath(`/`, "layout");
+  revalidatePath(`/posts/${postId}`);
 
   return comment;
 }
@@ -194,7 +205,7 @@ export async function deleteComment(commentId: string) {
     where: { id: commentId },
   });
 
-  revalidatePath(`/`, "layout");
+  revalidatePath(`/posts/${comment.post.id}`);
 
   return { message: "Comment deleted successfully" };
 }
@@ -232,7 +243,7 @@ export async function updateComment(commentId: string, newContent: string) {
     data: { content: newContent },
   });
 
-  revalidatePath(`/`, "layout");
+  revalidatePath(`/posts/${comment.post.id}`);
 
   return { message: "Comment updated successfully" };
 }

@@ -4,6 +4,10 @@ import PostCommentSection from "@/components/PostCommentSection";
 import prisma from "@/prisma/client";
 import { notFound } from "next/navigation";
 
+// Allow on-demand SSR for post IDs not covered by generateStaticParams
+// (i.e. newly created posts that weren't pre-built at build time)
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
   try {
     const posts = await prisma.post.findMany({

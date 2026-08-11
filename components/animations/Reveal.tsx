@@ -24,14 +24,14 @@ export default function Reveal({
   delay?: number;
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref);
+  // once: true — element animates in once and stays visible (never resets when scrolled out)
+  // This prevents constant re-renders of every PostCard during scroll
+  const isInView = useInView(ref, { once: true });
   const controls = useAnimation();
 
   useEffect(() => {
     if (isInView) {
       controls.start("visible");
-    } else {
-      controls.set("hidden");
     }
   }, [isInView, controls]);
 

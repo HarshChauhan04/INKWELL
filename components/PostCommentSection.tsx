@@ -25,7 +25,6 @@ import { postComment } from "@/actions/post.actions";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Session } from "next-auth";
 import CommentItem from "./CommentItem";
 import { ExtendedPost, Comment, CommentWithChildren } from "@/utils/types";
 import GoogleButton from "./GoogleButton";
@@ -149,7 +148,10 @@ export default function PostCommentSection({ post }: { post: ExtendedPost }) {
     });
 
     return chartCode;
-  }, [allComments, post.author.name, post.title]);
+  // post.author.name and post.title are stable fields read from the post prop;
+  // including the whole post object keeps deps correct without redundant primitives
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allComments, post]);
 
   // Render Mermaid SVG
   useEffect(() => {
@@ -270,7 +272,6 @@ export default function PostCommentSection({ post }: { post: ExtendedPost }) {
     isDragging.current = true;
     dragStart.current = { x: e.clientX, y: e.clientY };
     panStart.current = { ...pan };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pan]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -483,7 +484,6 @@ export default function PostCommentSection({ post }: { post: ExtendedPost }) {
                 key={comment.id}
                 comment={comment}
                 hasChildren={hasChildren}
-                session={session as Session}
                 post={post}
                 expandedComments={expandedComments}
                 setExpandedComments={setExpandedComments}
