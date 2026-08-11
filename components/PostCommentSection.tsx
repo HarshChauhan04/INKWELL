@@ -149,7 +149,7 @@ export default function PostCommentSection({ post }: { post: ExtendedPost }) {
     });
 
     return chartCode;
-  }, [allComments, postTitle, postAuthorName]);
+  }, [allComments, postTitle]);
 
   // Render Mermaid SVG
   useEffect(() => {
